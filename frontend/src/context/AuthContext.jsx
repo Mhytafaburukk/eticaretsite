@@ -4,35 +4,50 @@ const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [addresses, setAddresses] = useState([]);
 
-  // Sayfa yenilendiğinde localStorage'dan kullanıcıyı geri yükle
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      const parsedUser = JSON.parse(savedUser);
+      setUser(parsedUser);
+      fetchAddresses(parsedUser.userId || parsedUser.id);
     }
   }, []);
 
-  const login = (userData) => {
+  const fetchAddresses = async (userId) => {
+    if (!userId) return;
+    try {
+      const response = await fetch(`http://localhost:5147/api/Users/${userId}/addresses`);
+      if (response.ok) {
+        const data = await response.json();
+        setAddresses(data);
+      }
+    } catch (err) {
+      console.error("Error fetching addresses", err);
+    }
+  };
+
+  const login = async (userData) => {
     setUser(userData);
     localStorage.setItem('user', JSON.stringify(userData));
+    await fetchAddresses(userData.userId || userData.id);
   };
 
   const logout = () => {
     setUser(null);
+    setAddresses([]);
     localStorage.removeItem('user');
   };
 
-  const updateAddress = (newAddress) => {
+  const refreshAddresses = () => {
     if (user) {
-      const updatedUser = { ...user, address: newAddress };
-      setUser(updatedUser);
-      localStorage.setItem('user', JSON.stringify(updatedUser));
+      fetchAddresses(user.userId || user.id);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, updateAddress }}>
+    <AuthContext.Provider value={{ user, addresses, login, logout, refreshAddresses }}>
       {children}
     </AuthContext.Provider>
   );

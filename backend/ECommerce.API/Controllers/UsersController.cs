@@ -29,9 +29,10 @@ namespace ECommerce.API.Controllers
             public string Password { get; set; } = string.Empty;
         }
 
-        public class UpdateAddressDto
+        public class AddAddressDto
         {
-            public string Address { get; set; } = string.Empty;
+            public string Title { get; set; } = string.Empty;
+            public string FullAddress { get; set; } = string.Empty;
         }
 
         [HttpPost("register")]
@@ -46,14 +47,13 @@ namespace ECommerce.API.Controllers
             {
                 Name = dto.Name,
                 Email = dto.Email,
-                // Güvenlik: Gerçek bir projede bu şifre mutlaka 'Hash'lenerek kaydedilmeli.
                 Password = dto.Password 
             };
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            return Ok(new { Message = "Kayıt başarılı", UserId = user.Id, Name = user.Name, Email = user.Email, Address = user.Address });
+            return Ok(new { Message = "Kayıt başarılı", UserId = user.Id, Name = user.Name, Email = user.Email });
         }
 
         [HttpPost("login")]
@@ -65,19 +65,45 @@ namespace ECommerce.API.Controllers
                 return Unauthorized("Email veya şifre hatalı.");
             }
 
-            return Ok(new { Message = "Giriş başarılı", UserId = user.Id, Name = user.Name, Email = user.Email, Address = user.Address });
+            return Ok(new { Message = "Giriş başarılı", UserId = user.Id, Name = user.Name, Email = user.Email });
         }
 
-        [HttpPut("{id}/address")]
-        public async Task<IActionResult> UpdateAddress(int id, [FromBody] UpdateAddressDto dto)
+        [HttpGet("{id}/addresses")]
+        public async Task<IActionResult> GetAddresses(int id)
+        {
+            var addresses = await _context.UserAddresses.Where(a => a.UserId == id).ToListAsync();
+            return Ok(addresses);
+        }
+
+        [HttpPost("{id}/addresses")]
+        public async Task<IActionResult> AddAddress(int id, [FromBody] AddAddressDto dto)
         {
             var user = await _context.Users.FindAsync(id);
             if (user == null) return NotFound("Kullanıcı bulunamadı.");
 
-            user.Address = dto.Address;
+            var newAddress = new UserAddress
+            {
+                UserId = id,
+                Title = dto.Title,
+                FullAddress = dto.FullAddress
+            };
+
+            _context.UserAddresses.Add(newAddress);
             await _context.SaveChangesAsync();
 
-            return Ok(new { Message = "Adres güncellendi", Address = user.Address });
+            return Ok(new { Message = "Adres eklendi", Address = newAddress });
+        }
+
+        [HttpDelete("addresses/{addressId}")]
+        public async Task<IActionResult> DeleteAddress(int addressId)
+        {
+            var address = await _context.UserAddresses.FindAsync(addressId);
+            if (address == null) return NotFound("Adres bulunamadı.");
+
+            _context.UserAddresses.Remove(address);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { Message = "Adres silindi" });
         }
     }
 }

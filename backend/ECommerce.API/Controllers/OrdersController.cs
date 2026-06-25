@@ -18,6 +18,9 @@ namespace ECommerce.API.Controllers
         public class OrderCreateDto
         {
             public decimal TotalAmount { get; set; }
+            public int? UserId { get; set; }
+            public string ShippingAddress { get; set; } = string.Empty;
+            public string PaymentMethod { get; set; } = string.Empty;
             public List<OrderItemDto> Items { get; set; } = new();
         }
 
@@ -37,6 +40,9 @@ namespace ECommerce.API.Controllers
             var order = new Order
             {
                 TotalAmount = dto.TotalAmount,
+                UserId = dto.UserId,
+                ShippingAddress = dto.ShippingAddress,
+                PaymentMethod = dto.PaymentMethod,
                 OrderDate = DateTime.UtcNow,
                 OrderItems = dto.Items.Select(i => new OrderItem
                 {

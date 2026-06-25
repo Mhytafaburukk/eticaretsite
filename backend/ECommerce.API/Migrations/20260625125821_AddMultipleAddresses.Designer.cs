@@ -3,6 +3,7 @@ using System;
 using ECommerce.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ECommerce.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260625125821_AddMultipleAddresses")]
+    partial class AddMultipleAddresses
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -54,12 +57,6 @@ namespace ECommerce.API.Migrations
                             Id = 2,
                             Description = "Apparel",
                             Name = "Clothing"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Description = "Delicious meals and snacks",
-                            Name = "Food"
                         });
                 });
 
@@ -181,15 +178,6 @@ namespace ECommerce.API.Migrations
                             ImageUrl = "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=800&auto=format&fit=crop",
                             Name = "T-Shirt",
                             Price = 25.00m
-                        },
-                        new
-                        {
-                            Id = 4,
-                            CategoryId = 3,
-                            Description = "Juicy beef burger with cheese",
-                            ImageUrl = "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=800&auto=format&fit=crop",
-                            Name = "Gourmet Burger",
-                            Price = 12.50m
                         });
                 });
 
