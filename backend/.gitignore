@@ -1,0 +1,23 @@
+# Build results
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+
+# NuGet
+*.nupkg
+packages/
+
+# IDE
+.vs/
+.vscode/
+.idea/
+
+# Migrations (keep these)
+# !Migrations/
+
+# OS
+.DS_Store
