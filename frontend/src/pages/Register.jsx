@@ -26,7 +26,8 @@ function Register() {
       }
       
       const data = await response.json();
-      login({ id: data.userId, name: data.name, email: data.email, address: data.address });
+      const userData = data.user || data;
+      login({ id: userData.id || userData.userId, name: userData.name, email: userData.email });
       navigate('/');
     } catch (err) {
       setError(err.message);

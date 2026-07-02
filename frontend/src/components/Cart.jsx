@@ -55,7 +55,12 @@ function Cart({ isOpen, onClose }) {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create order');
+        let errorMsg = 'Failed to create order';
+        try {
+          const errorData = await response.json();
+          if (errorData.message) errorMsg = errorData.message;
+        } catch (e) {}
+        throw new Error(errorMsg);
       }
 
       setStep(3); // Success
@@ -108,7 +113,13 @@ function Cart({ isOpen, onClose }) {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <button onClick={() => updateQuantity(item.product.id, -1)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', width: '24px', height: '24px', borderRadius: '4px', cursor: 'pointer' }}>-</button>
                   <span>{item.quantity}</span>
-                  <button onClick={() => updateQuantity(item.product.id, 1)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', width: '24px', height: '24px', borderRadius: '4px', cursor: 'pointer' }}>+</button>
+                  <button 
+                    onClick={() => updateQuantity(item.product.id, 1)} 
+                    disabled={item.quantity >= item.product.unitsInStock}
+                    style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', width: '24px', height: '24px', borderRadius: '4px', cursor: item.quantity >= item.product.unitsInStock ? 'not-allowed' : 'pointer', opacity: item.quantity >= item.product.unitsInStock ? 0.5 : 1 }}
+                  >
+                    +
+                  </button>
                   <button onClick={() => removeFromCart(item.product.id)} style={{ background: 'none', border: 'none', color: '#ef4444', marginLeft: '0.5rem', cursor: 'pointer', fontWeight: 'bold' }}>&times;</button>
                 </div>
               </div>

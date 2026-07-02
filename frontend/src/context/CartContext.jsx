@@ -40,6 +40,11 @@ export function CartProvider({ children }) {
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const totalAmount = cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
 
+  const getCartQuantity = (productId) => {
+    const item = cartItems.find(item => item.product.id === productId);
+    return item ? item.quantity : 0;
+  };
+
   return (
     <CartContext.Provider value={{
       cartItems,
@@ -48,7 +53,8 @@ export function CartProvider({ children }) {
       updateQuantity,
       clearCart,
       totalItems,
-      totalAmount
+      totalAmount,
+      getCartQuantity
     }}>
       {children}
     </CartContext.Provider>

@@ -22,7 +22,7 @@ function Login() {
       if (!response.ok) throw new Error('Email or password is wrong');
       
       const data = await response.json();
-      login({ id: data.userId, name: data.name, email: data.email, address: data.address });
+      login({ id: data.id || data.userId, name: data.name, email: data.email, address: data.address });
       navigate('/');
     } catch (err) {
       setError(err.message);

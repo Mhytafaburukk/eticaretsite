@@ -8,6 +8,6 @@ namespace Entities.Concrete
         public string Title { get; set; } = string.Empty;
         public string FullAddress { get; set; } = string.Empty;
         
-        public User User { get; set; } = null!;
+        public User? User { get; set; }
     }
 }

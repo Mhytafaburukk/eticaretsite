@@ -10,10 +10,12 @@ namespace ECommerce.API.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IUserAddressService _userAddressService;
 
-        public UsersController(IUserService userService)
+        public UsersController(IUserService userService, IUserAddressService userAddressService)
         {
             _userService = userService;
+            _userAddressService = userAddressService;
         }
 
         [HttpPost("login")]
@@ -37,6 +39,31 @@ namespace ECommerce.API.Controllers
                 
             _userService.Add(registerUser);
             return Ok(new { message = "Kayıt başarılı", user = registerUser });
+        }
+
+        [HttpGet("{userId}/addresses")]
+        public IActionResult GetAddresses(int userId)
+        {
+            var addresses = _userAddressService.GetAll().Where(a => a.UserId == userId).ToList();
+            return Ok(addresses);
+        }
+
+        [HttpPost("{userId}/addresses")]
+        public IActionResult AddAddress(int userId, UserAddress address)
+        {
+            address.UserId = userId;
+            _userAddressService.Add(address);
+            return Ok(new { message = "Adres eklendi", address = address });
+        }
+
+        [HttpDelete("addresses/{addressId}")]
+        public IActionResult DeleteAddress(int addressId)
+        {
+            var address = _userAddressService.GetById(addressId);
+            if (address == null) return NotFound(new { message = "Adres bulunamadı" });
+            
+            _userAddressService.Delete(address);
+            return Ok(new { message = "Adres silindi" });
         }
     }
 }

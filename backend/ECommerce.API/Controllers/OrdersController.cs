@@ -24,8 +24,15 @@ namespace ECommerce.API.Controllers
         [HttpPost]
         public IActionResult Post(Order order)
         {
-            _orderService.Add(order);
-            return Ok(new { message = "Sipariş oluşturuldu" });
+            try
+            {
+                _orderService.Add(order);
+                return Ok(new { message = "Sipariş oluşturuldu" });
+            }
+            catch (System.Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }
