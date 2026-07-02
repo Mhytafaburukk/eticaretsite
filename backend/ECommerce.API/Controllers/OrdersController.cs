@@ -1,5 +1,5 @@
-using ECommerce.API.Data;
-using ECommerce.API.Models;
+using Business.Abstract;
+using Entities.Concrete;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerce.API.Controllers
@@ -8,54 +8,24 @@ namespace ECommerce.API.Controllers
     [ApiController]
     public class OrdersController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IOrderService _orderService;
 
-        public OrdersController(AppDbContext context)
+        public OrdersController(IOrderService orderService)
         {
-            _context = context;
+            _orderService = orderService;
         }
 
-        public class OrderCreateDto
+        [HttpGet]
+        public IActionResult Get()
         {
-            public decimal TotalAmount { get; set; }
-            public int? UserId { get; set; }
-            public string ShippingAddress { get; set; } = string.Empty;
-            public string PaymentMethod { get; set; } = string.Empty;
-            public List<OrderItemDto> Items { get; set; } = new();
-        }
-
-        public class OrderItemDto
-        {
-            public int ProductId { get; set; }
-            public int Quantity { get; set; }
-            public decimal UnitPrice { get; set; }
+            return Ok(_orderService.GetAll());
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateOrder([FromBody] OrderCreateDto dto)
+        public IActionResult Post(Order order)
         {
-            if (dto.Items == null || !dto.Items.Any())
-                return BadRequest("Order must contain at least one item.");
-
-            var order = new Order
-            {
-                TotalAmount = dto.TotalAmount,
-                UserId = dto.UserId,
-                ShippingAddress = dto.ShippingAddress,
-                PaymentMethod = dto.PaymentMethod,
-                OrderDate = DateTime.UtcNow,
-                OrderItems = dto.Items.Select(i => new OrderItem
-                {
-                    ProductId = i.ProductId,
-                    Quantity = i.Quantity,
-                    UnitPrice = i.UnitPrice
-                }).ToList()
-            };
-
-            _context.Orders.Add(order);
-            await _context.SaveChangesAsync();
-
-            return Ok(new { Message = "Order created successfully", OrderId = order.Id });
+            _orderService.Add(order);
+            return Ok(new { message = "Sipariş oluşturuldu" });
         }
     }
 }

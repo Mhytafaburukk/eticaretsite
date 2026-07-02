@@ -1,7 +1,6 @@
-using ECommerce.API.Data;
-using ECommerce.API.Models;
+using Business.Abstract;
+using Entities.Concrete;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace ECommerce.API.Controllers
 {
@@ -9,39 +8,32 @@ namespace ECommerce.API.Controllers
     [ApiController]
     public class CategoriesController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly ICategoryService _categoryService;
 
-        public CategoriesController(AppDbContext context)
+        public CategoriesController(ICategoryService categoryService)
         {
-            _context = context;
+            _categoryService = categoryService;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Category>>> GetCategories()
+        public IActionResult Get()
         {
-            return await _context.Categories.ToListAsync();
+            return Ok(_categoryService.GetAll());
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Category>> GetCategory(int id)
+        public IActionResult Get(int id)
         {
-            var category = await _context.Categories.FindAsync(id);
-
-            if (category == null)
-            {
-                return NotFound();
-            }
-
-            return category;
+            var result = _categoryService.GetById(id);
+            if (result == null) return NotFound();
+            return Ok(result);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Category>> PostCategory(Category category)
+        public IActionResult Post(Category category)
         {
-            _context.Categories.Add(category);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetCategory), new { id = category.Id }, category);
+            _categoryService.Add(category);
+            return Ok(new { message = "Kategori eklendi" });
         }
     }
 }

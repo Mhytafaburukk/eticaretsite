@@ -1,7 +1,7 @@
-using ECommerce.API.Data;
-using ECommerce.API.Models;
+using Business.Abstract;
+using Entities.Concrete;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace ECommerce.API.Controllers
 {
@@ -9,101 +9,34 @@ namespace ECommerce.API.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IUserService _userService;
 
-        public UsersController(AppDbContext context)
+        public UsersController(IUserService userService)
         {
-            _context = context;
-        }
-
-        public class RegisterDto
-        {
-            public string Name { get; set; } = string.Empty;
-            public string Email { get; set; } = string.Empty;
-            public string Password { get; set; } = string.Empty;
-        }
-
-        public class LoginDto
-        {
-            public string Email { get; set; } = string.Empty;
-            public string Password { get; set; } = string.Empty;
-        }
-
-        public class AddAddressDto
-        {
-            public string Title { get; set; } = string.Empty;
-            public string FullAddress { get; set; } = string.Empty;
-        }
-
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterDto dto)
-        {
-            if (await _context.Users.AnyAsync(u => u.Email == dto.Email))
-            {
-                return BadRequest("Bu email adresi zaten kullanılıyor.");
-            }
-
-            var user = new User
-            {
-                Name = dto.Name,
-                Email = dto.Email,
-                Password = dto.Password 
-            };
-
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            return Ok(new { Message = "Kayıt başarılı", UserId = user.Id, Name = user.Name, Email = user.Email });
+            _userService = userService;
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginDto dto)
+        public IActionResult Login(User loginUser)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email && u.Password == dto.Password);
+            var users = _userService.GetAll();
+            var user = users.FirstOrDefault(u => u.Email == loginUser.Email && u.Password == loginUser.Password);
+            
             if (user == null)
-            {
-                return Unauthorized("Email veya şifre hatalı.");
-            }
-
-            return Ok(new { Message = "Giriş başarılı", UserId = user.Id, Name = user.Name, Email = user.Email });
+                return Unauthorized(new { message = "Geçersiz email veya şifre" });
+                
+            return Ok(user);
         }
 
-        [HttpGet("{id}/addresses")]
-        public async Task<IActionResult> GetAddresses(int id)
+        [HttpPost("register")]
+        public IActionResult Register(User registerUser)
         {
-            var addresses = await _context.UserAddresses.Where(a => a.UserId == id).ToListAsync();
-            return Ok(addresses);
-        }
-
-        [HttpPost("{id}/addresses")]
-        public async Task<IActionResult> AddAddress(int id, [FromBody] AddAddressDto dto)
-        {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null) return NotFound("Kullanıcı bulunamadı.");
-
-            var newAddress = new UserAddress
-            {
-                UserId = id,
-                Title = dto.Title,
-                FullAddress = dto.FullAddress
-            };
-
-            _context.UserAddresses.Add(newAddress);
-            await _context.SaveChangesAsync();
-
-            return Ok(new { Message = "Adres eklendi", Address = newAddress });
-        }
-
-        [HttpDelete("addresses/{addressId}")]
-        public async Task<IActionResult> DeleteAddress(int addressId)
-        {
-            var address = await _context.UserAddresses.FindAsync(addressId);
-            if (address == null) return NotFound("Adres bulunamadı.");
-
-            _context.UserAddresses.Remove(address);
-            await _context.SaveChangesAsync();
-
-            return Ok(new { Message = "Adres silindi" });
+            var users = _userService.GetAll();
+            if (users.Any(u => u.Email == registerUser.Email))
+                return BadRequest(new { message = "Bu email adresi zaten kullanılıyor" });
+                
+            _userService.Add(registerUser);
+            return Ok(new { message = "Kayıt başarılı", user = registerUser });
         }
     }
 }

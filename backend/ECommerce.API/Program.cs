@@ -1,4 +1,7 @@
-using ECommerce.API.Data;
+using Business.Abstract;
+using Business.Concrete;
+using DataAccess.Abstract;
+using DataAccess.Concrete.EntityFramework;
 using Microsoft.EntityFrameworkCore;
 
 using System.Text.Json.Serialization;
@@ -10,8 +13,7 @@ builder.Services.AddControllers().AddJsonOptions(x =>
     x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
 // Configure Database
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 
 // Configure CORS
 builder.Services.AddCors(options =>
